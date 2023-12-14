@@ -20,8 +20,8 @@ const AlreadyLogin Status = 3
 const NotLogin Status = 4
 
 type User struct {
-	Phone string
-	// registerTime time.Time
+	Phone     string `redis:"phone"`
+	LoginTime string `redis:"loginTime"`
 }
 
 func isValidPhone(phone string) bool {
