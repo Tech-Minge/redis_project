@@ -1,9 +1,7 @@
 package main
 
-import (
-	"learn_redis/usage"
-)
+import "learn_redis/web"
 
 func main() {
-	usage.TryOps()
+	web.StartServer()
 }
