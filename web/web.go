@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/gob"
-	"learn_redis/login"
+	"learn_redis/backend"
 	"log"
 	"net/http"
 	"text/template"
@@ -16,7 +16,7 @@ var tpl *template.Template
 
 func StartServer() {
 	tpl, _ = template.ParseGlob("web/page/*.html")
-	gob.Register(login.User{})
+	gob.Register(backend.User{})
 	http.HandleFunc("/hello", helloHandler)
 
 	if redisBased {

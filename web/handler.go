@@ -1,7 +1,8 @@
 package web
 
 import (
-	"learn_redis/login"
+	"fmt"
+	"learn_redis/backend"
 	"log"
 	"net/http"
 )
@@ -15,7 +16,8 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "Call hello handler")
 	cookie, _ := r.Cookie("token")
 	// maintain login status if already login
-	login.IsLogin(cookie)
+	fmt.Fprintf(w, "Welcome!")
+	backend.IsLogin(cookie)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +44,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func loginGetHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call login GET handler")
 	session, _ := store.Get(r, "session")
-	if login.IsSessionLogin(session) == login.NotLogin {
+	if backend.IsSessionLogin(session) == backend.NotLogin {
 		log.Println(r.RemoteAddr, "not login before")
 		tpl.ExecuteTemplate(w, "login.html", nil)
 	} else {
@@ -56,7 +58,7 @@ func loginPostCodeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call login code POST handler")
 	session, _ := store.Get(r, "session")
 	phone := r.FormValue("phone")
-	if login.SencCode(phone, session) == login.WrongPhone {
+	if backend.SencCode(phone, session) == backend.WrongPhone {
 		log.Println(r.RemoteAddr, "type wrong phone")
 		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
 	} else {
@@ -72,11 +74,11 @@ func loginPostAuthHandler(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	code := r.FormValue("code")
 
-	switch login.Login(phone, code, session) {
-	case login.WrongPhone:
+	switch backend.Login(phone, code, session) {
+	case backend.WrongPhone:
 		log.Println(r.RemoteAddr, "type wrong phone")
 		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
-	case login.WrongCode:
+	case backend.WrongCode:
 		log.Println(r.RemoteAddr, "type wrong code")
 		tpl.ExecuteTemplate(w, "login.html", "check code!")
 	default:
@@ -99,14 +101,14 @@ func infoHandler(w http.ResponseWriter, r *http.Request) {
 func infoDisplayHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call info display GET handler")
 	session, _ := store.Get(r, "session")
-	data := login.GetDisplayString(session)
+	data := backend.GetDisplayString(session)
 	tpl.ExecuteTemplate(w, "info.html", data)
 }
 
 func infoLogoutHander(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call info logout POST handler")
 	session, _ := store.Get(r, "session")
-	login.Logout(session)
+	backend.Logout(session)
 	session.Save(r, w)
 	log.Println(r.RemoteAddr, "logout, now redirect to login page")
 	http.Redirect(w, r, "/login", http.StatusFound)

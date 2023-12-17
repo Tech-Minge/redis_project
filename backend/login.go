@@ -1,7 +1,8 @@
-package login
+package backend
 
 import (
 	"fmt"
+
 	"log"
 	"math/rand"
 	"regexp"
@@ -10,19 +11,6 @@ import (
 
 	"github.com/gorilla/sessions"
 )
-
-type Status int
-
-const OK Status = 0
-const WrongPhone Status = 1
-const WrongCode Status = 2
-const AlreadyLogin Status = 3
-const NotLogin Status = 4
-
-type User struct {
-	Phone     string `redis:"phone"`
-	LoginTime string `redis:"loginTime"`
-}
 
 func isValidPhone(phone string) bool {
 	regRuler := "^1[345789]{1}\\d{9}$"

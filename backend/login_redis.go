@@ -1,7 +1,6 @@
-package login
+package backend
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -10,22 +9,6 @@ import (
 
 	"github.com/redis/go-redis/v9"
 )
-
-const (
-	LOGIN_CODE_PREFIX  string        = "login:code:"
-	LOGIN_CODE_EXPIRE  time.Duration = time.Second * 30
-	LOGIN_TOKEN_PREFIX string        = "login:token:"
-	LOGIN_TOKEN_EXPIRE time.Duration = time.Minute
-
-	defaultTokenLen int = 16
-)
-
-var ctx = context.Background()
-var rdb = redis.NewClient(&redis.Options{
-	Addr:     "localhost:6379",
-	Password: "",
-	DB:       0,
-})
 
 func generateToken() string {
 	rand.Seed(time.Now().UnixNano())

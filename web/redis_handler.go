@@ -1,7 +1,7 @@
 package web
 
 import (
-	"learn_redis/login"
+	"learn_redis/backend"
 	"log"
 	"net/http"
 )
@@ -29,7 +29,7 @@ func loginRedisHandler(w http.ResponseWriter, r *http.Request) {
 func loginGetRedisHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call login GET Redis handler")
 	cookie, _ := r.Cookie("token")
-	if login.IsLogin(cookie) == login.NotLogin {
+	if backend.IsLogin(cookie) == backend.NotLogin {
 		log.Println(r.RemoteAddr, "not login before")
 		tpl.ExecuteTemplate(w, "login.html", nil)
 	} else {
@@ -41,7 +41,7 @@ func loginGetRedisHandler(w http.ResponseWriter, r *http.Request) {
 func loginPostCodeRedisHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call login code POST Redis handler")
 	phone := r.FormValue("phone")
-	if login.SendCodeRedis(phone) == login.WrongPhone {
+	if backend.SendCodeRedis(phone) == backend.WrongPhone {
 		log.Println(r.RemoteAddr, "type wrong phone")
 		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
 	} else {
@@ -55,12 +55,12 @@ func loginPostAuthRedisHandler(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	code := r.FormValue("code")
 
-	token, status := login.LoginRedis(phone, code)
+	token, status := backend.LoginRedis(phone, code)
 	switch status {
-	case login.WrongPhone:
+	case backend.WrongPhone:
 		log.Println(r.RemoteAddr, "type wrong phone")
 		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
-	case login.WrongCode:
+	case backend.WrongCode:
 		log.Println(r.RemoteAddr, "type wrong code")
 		tpl.ExecuteTemplate(w, "login.html", "check code!")
 	default:
@@ -86,14 +86,14 @@ func infoRedisHandler(w http.ResponseWriter, r *http.Request) {
 func infoDisplayRedisHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call info display GET Redis handler")
 	cookie, _ := r.Cookie("token")
-	data := login.GetDisplayStringRedis(cookie)
+	data := backend.GetDisplayStringRedis(cookie)
 	tpl.ExecuteTemplate(w, "info.html", data)
 }
 
 func infoLogoutRedisHander(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "call info logout POST Redis handler")
 	cookie, _ := r.Cookie("token")
-	login.LogoutRedis(cookie)
+	backend.LogoutRedis(cookie)
 	log.Println(r.RemoteAddr, "logout, now redirect to login page")
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
