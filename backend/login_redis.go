@@ -20,16 +20,16 @@ func generateToken() string {
 	return string(b)
 }
 
-func IsLogin(cookie *http.Cookie) Status {
+func IsLogin(cookie *http.Cookie) bool {
 	if cookie == nil {
-		return NotLogin
+		return false
 	}
 	// check redis
 	tokenKey := LOGIN_TOKEN_PREFIX + cookie.Value
 	if FlushKeyExpire(tokenKey, LOGIN_TOKEN_EXPIRE) {
-		return AlreadyLogin
+		return true
 	} else {
-		return NotLogin
+		return false
 	}
 }
 
@@ -101,8 +101,8 @@ func LoginRedis(phone, code string) (string, Status) {
 	return token, OK
 }
 
-func GetDisplayStringRedis(cookie *http.Cookie) string {
-	if IsLogin(cookie) == AlreadyLogin {
+func GetUserRedis(cookie *http.Cookie) string {
+	if IsLogin(cookie) {
 		tokenKey := LOGIN_TOKEN_PREFIX + cookie.Value
 		var user User
 		if err := rdb.HGetAll(ctx, tokenKey).Scan(&user); err != nil {

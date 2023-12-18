@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"learn_redis/backend"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -60,4 +62,25 @@ func TryOps() {
 	var v Value
 	rdb.Get(ctx, "name2").Scan(&v)
 	fmt.Println(v)
+
+	// gob.Register(backend.Shop{})
+	rd := backend.DataWithExpire{
+		RealData: backend.Shop{
+			Id:       1,
+			Name:     "HeyTea",
+			Location: "WuHan",
+		},
+		ExpireTime: time.Now(),
+	}
+	_, err = rdb.Set(ctx, "logic", rd, 0).Result()
+	if err != nil {
+		panic(err.Error())
+	}
+	nrd := backend.DataWithExpire{RealData: &backend.Shop{}}
+
+	if err := rdb.Get(ctx, "logic").Scan(&nrd); err != nil {
+		panic(err.Error())
+	}
+	fmt.Println(rd, nrd)
+	fmt.Println(nrd.RealData)
 }

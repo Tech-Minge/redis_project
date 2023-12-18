@@ -22,6 +22,8 @@ func StartServer() {
 	if redisBased {
 		http.HandleFunc("/login", loginRedisHandler)
 		http.HandleFunc("/me", infoRedisHandler)
+		http.HandleFunc("/shop", shopRedisHandler) // no redirect
+		http.HandleFunc("/shop/", shopRedisHandler)
 		log.Println("Server ready to start based on redis")
 	} else {
 		store = sessions.NewFilesystemStore("./session", []byte("super-secret"))
