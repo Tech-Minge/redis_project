@@ -6,7 +6,7 @@
 
 <form method="POST">
     <label for="phone">Phone:</label><br>
-    <input type="text" id="phone" name="phone" value="{{if .Phone}}{{.Phone}}{{end}}"><br>
+    <input type="text" id="phone" name="phone"><br>
     <label for="code">Code:</label><br>
     <input type="text" id="code" name="code"><br><br>
     <input type="submit" value="Generate" name="generate">
@@ -14,8 +14,8 @@
 </form>
 
 <br><br>
-{{if .Hint}}
-    {{.Hint}}
+{{if .}}
+    {{.}}
 {{end}}
 
 

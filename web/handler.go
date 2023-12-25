@@ -23,8 +23,8 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	if session.IsNew {
-		log.Println(r.RemoteAddr, "is assigned new session id", session.ID)
-		session.Save(r, w)
+		log.Println(r.RemoteAddr, "is assigned new session id, but don't save now", session.ID)
+		// session.Save(r, w)
 	}
 	if r.Method == "GET" {
 		loginGetHandler(w, r)
@@ -46,7 +46,7 @@ func loginGetHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	if backend.IsSessionLogin(session) == backend.NotLogin {
 		log.Println(r.RemoteAddr, "not login before")
-		tpl.ExecuteTemplate(w, "login.html", nil)
+		tpl.ExecuteTemplate(w, "login_simple.html", nil)
 	} else {
 		log.Println(r.RemoteAddr, "already login, now redirect to info page")
 		http.Redirect(w, r, "/me", http.StatusFound)
@@ -60,11 +60,11 @@ func loginPostCodeHandler(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	if backend.SencCode(phone, session) == backend.WrongPhone {
 		log.Println(r.RemoteAddr, "type wrong phone")
-		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
+		tpl.ExecuteTemplate(w, "login_simple.html", "check phone number!")
 	} else {
 		session.Save(r, w)
 		log.Println(r.RemoteAddr, "type correct phone")
-		tpl.ExecuteTemplate(w, "login.html", "code generated!")
+		tpl.ExecuteTemplate(w, "login_simple.html", "code generated!")
 	}
 }
 
@@ -77,10 +77,10 @@ func loginPostAuthHandler(w http.ResponseWriter, r *http.Request) {
 	switch backend.Login(phone, code, session) {
 	case backend.WrongPhone:
 		log.Println(r.RemoteAddr, "type wrong phone")
-		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
+		tpl.ExecuteTemplate(w, "login_simple.html", "check phone number!")
 	case backend.WrongCode:
 		log.Println(r.RemoteAddr, "type wrong code")
-		tpl.ExecuteTemplate(w, "login.html", "check code!")
+		tpl.ExecuteTemplate(w, "login_simple.html", "check code!")
 	default:
 		session.Save(r, w)
 		log.Println(r.RemoteAddr, "authenticate ok, now redirect to info page")

@@ -1,7 +1,9 @@
 package usage
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"learn_redis/backend"
@@ -63,24 +65,94 @@ func TryOps() {
 	rdb.Get(ctx, "name2").Scan(&v)
 	fmt.Println(v)
 
-	// gob.Register(backend.Shop{})
-	rd := backend.DataWithExpire{
-		RealData: backend.Shop{
-			Id:       1,
-			Name:     "HeyTea",
-			Location: "WuHan",
-		},
-		ExpireTime: time.Now(),
+}
+
+type InterfaceData struct {
+	Data   interface{} `redis:"data"`
+	Expire time.Time   `redis:"expire"`
+}
+
+func (i InterfaceData) MarshalBinary() ([]byte, error) {
+
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	if err := enc.Encode(&i.Data); err != nil {
+		panic(err.Error())
 	}
-	_, err = rdb.Set(ctx, "logic", rd, 0).Result()
+	if err := enc.Encode(i.Expire); err != nil {
+		panic(err.Error())
+	}
+	return buf.Bytes(), nil
+
+}
+
+func (i *InterfaceData) UnmarshalBinary(data []byte) error {
+
+	dec := gob.NewDecoder(bytes.NewReader(data))
+	if err := dec.Decode(&i.Data); err != nil {
+		panic(err.Error())
+	}
+	if err := dec.Decode(&i.Expire); err != nil {
+		panic(err.Error())
+	}
+	return nil
+
+}
+
+func TryGob() {
+	gob.Register(backend.Shop{})
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	ctx := context.Background()
+	idata := InterfaceData{
+		Data: backend.Shop{
+			Id:       1,
+			Name:     "HeyBack",
+			Location: "GuangZhou",
+		},
+		Expire: time.Now(),
+	}
+	rdb.Del(ctx, "logic")
+	count, err := rdb.Set(ctx, "logic", idata, 0).Result()
 	if err != nil {
 		panic(err.Error())
 	}
-	nrd := backend.DataWithExpire{RealData: &backend.Shop{}}
+	fmt.Println(count)
 
-	if err := rdb.Get(ctx, "logic").Scan(&nrd); err != nil {
+	var t InterfaceData
+	all := rdb.Get(ctx, "logic")
+
+	if err := all.Scan(&t); err != nil {
 		panic(err.Error())
 	}
-	fmt.Println(rd, nrd)
-	fmt.Println(nrd.RealData)
+
+	fmt.Println(idata, t, t.Data.(backend.Shop))
+}
+
+func TryLua() {
+	var incrBy = redis.NewScript(
+		`
+		if (redis.call("GET", KEYS[1]) == ARGV[1]) then
+			return redis.call("DEL", KEYS[1])
+		end
+
+		return 0
+		`)
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	ctx := context.Background()
+
+	num, err := incrBy.Run(ctx, rdb, []string{"axs"}, 122).Int()
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println(num)
 }

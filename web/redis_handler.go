@@ -14,6 +14,11 @@ import (
 	store token in cookie
 */
 
+type WebInfo struct {
+	Phone string
+	Hint  string
+}
+
 // login handler
 func loginRedisHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -49,10 +54,10 @@ func loginPostCodeRedisHandler(w http.ResponseWriter, r *http.Request) {
 	switch backend.SendCodeRedis(phone) {
 	case backend.WrongPhone:
 		log.Println(r.RemoteAddr, "type wrong phone")
-		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
+		tpl.ExecuteTemplate(w, "login.html", WebInfo{Hint: "invalid phone number!"})
 	case backend.OK:
 		log.Println(r.RemoteAddr, "type correct phone")
-		tpl.ExecuteTemplate(w, "login.html", "code generated!")
+		tpl.ExecuteTemplate(w, "login.html", WebInfo{Phone: phone, Hint: "code generated!"})
 	default:
 		panic("Unexpected")
 	}
@@ -67,10 +72,10 @@ func loginPostAuthRedisHandler(w http.ResponseWriter, r *http.Request) {
 	switch status {
 	case backend.WrongPhone:
 		log.Println(r.RemoteAddr, "type wrong phone")
-		tpl.ExecuteTemplate(w, "login.html", "check phone number!")
+		tpl.ExecuteTemplate(w, "login.html", WebInfo{Hint: "invalid phone number!"})
 	case backend.WrongCode:
 		log.Println(r.RemoteAddr, "type wrong code")
-		tpl.ExecuteTemplate(w, "login.html", "check code!")
+		tpl.ExecuteTemplate(w, "login.html", WebInfo{Phone: phone, Hint: "wrong code!"})
 	default:
 		log.Println(r.RemoteAddr, "authenticate ok by redis, now set cookie and redirect to info page")
 		http.SetCookie(w, &http.Cookie{
