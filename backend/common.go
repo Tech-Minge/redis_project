@@ -20,6 +20,10 @@ const (
 	DIS_LOCK_PREFIX    string        = "dis:lock:"
 	VOU_STK_PREFIX     string        = "voucher:stock:"
 	VOU_BUY_PREFIX     string        = "voucher:buy:"
+	BLOG_LIKE_PREFIX   string        = "blog:like:"
+	FEED_USER_PREFIX   string        = "feed:user:"
+	SHOP_TYPE_PREFIX   string        = "shop:type:"
+	SIGN_UP_PREFIX     string        = "sign:"
 	LOGIN_CODE_EXPIRE  time.Duration = time.Second * 30
 	LOGIN_TOKEN_EXPIRE time.Duration = time.Minute
 	SHOP_INFO_EXPIRE   time.Duration = time.Minute
@@ -29,6 +33,7 @@ const (
 	SHOP_LOGIC_EXPIRE  time.Duration = time.Minute
 	DIS_LOCK_EXPIRE    time.Duration = time.Minute
 	TASK_WORK_TIME     time.Duration = time.Millisecond * 100
+	TASK_BLOCK_TIME    time.Duration = time.Second * 2
 
 	OK           Status = 0
 	WrongPhone   Status = 1
@@ -39,8 +44,15 @@ const (
 	DuplicateID  Status = 6
 	NullValue    Status = 7
 
-	defaultTokenLen int    = 16
-	shopFile        string = "backend/db/shop.json" // from root dir of this project, note when change working dir!
+	hyperloglogKey   string  = "hll"
+	shopSearchRadius float64 = 20
+	pageShopsNum     int     = 2
+	pagePostsNum     int     = 2
+	groupName        string  = "g1"
+	streamName       string  = "stream.order"
+	taskWorkerNum    int     = 2
+	defaultTokenLen  int     = 16
+	shopFile         string  = "backend/db/shop.json" // from root dir of this project, note when change working dir!
 )
 
 var hotShopId = []int{1, 2}
