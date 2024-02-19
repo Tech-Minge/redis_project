@@ -1,0 +1,11 @@
+redis:
+  ip: 127.0.0.1
+  port: 6379
+  database: 0
+
+mysql:
+  ip: 127.0.0.1
+  port: 3306
+  database: hmdp
+  user: root
+  password: 13616749175ymq

@@ -1,2 +1,4 @@
 .vscode/
 session/
+*_temp
+logs
